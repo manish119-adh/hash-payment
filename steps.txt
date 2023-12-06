@@ -1,0 +1,28 @@
+Open directory in terminal
+
+git clone git@github.com:manish119-adh/hash-payment.git 
+OR 
+git clone https://github.com/manish119-adh/hash-payment.git
+
+Folder names "hash-payment" should be generated
+
+Open Pycharm
+click File > Open and Select hash-payment folder
+
+The project creation wizard with select project names etc will come
+
+After completing go to File > Settings
+
+Select Project:[PROject Name] menu on left side
+Choose Python interpretor path
+
+Locate python interpretor using "whereis python3" command
+
+Select python interpretor for the project
+
+Install Libraries:
+py-solc-x (for compiling contract), web3 (for interacting with ethereum) and pycryptodome (for sha256) using:
+
+"pip3 install py-solc-x"
+"pip3 install web3"
+"pip3 install pycryptodome" 
