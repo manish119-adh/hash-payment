@@ -25,7 +25,7 @@ from Crypto.Hash import SHA256
 
 class Hashpayment:
 
-    def __init__(self, url, chainid, address, privatekey, contract=None):
+    def __init__(self, url, chainid, address, privatekey, contract=None, bncontract=None):
         self.chain = Web3(Web3.HTTPProvider(url, request_kwargs={'timeout': 60}))
         self.chainid = chainid
         if contract is not None:
@@ -33,6 +33,11 @@ class Hashpayment:
             self.deployed_contract = self.chain.eth.contract(address=contract[1], abi=contract[0])
         else:
             self.deployed_contract = None
+
+        if bncontract is not None:
+            self.bn254_contract = self.chain.eth.contract(address=bncontract[1], abi=bncontract[0])
+        else:
+            self.bn254_contract = None
         self.address = address
         self.privatekey = privatekey
         pass
@@ -49,7 +54,9 @@ class Hashpayment:
         compiler_input = {
             'language': 'Solidity', # language
             'sources': {
-                "HashPaymentSystem.sol": {'urls': ["contract/HashPaymentSystem.sol"]} # Source files
+                "HashPaymentSystem.sol": {'urls': ["contract/HashPaymentSystem.sol"]}, # Source files
+                "BN254.sol":{'urls':["contract/bn254/BN254.sol"]},
+                "Utils.sol":{'urls':["contract/bn254/Utils.sol"]}
 
             },
             'settings': {  # What outputs we need. We are interested in abi and bytecode
@@ -68,6 +75,7 @@ class Hashpayment:
 
     # After compiling it needs to be deployed. Deploying the contract
     # sometimes requires costructor parameters as defined in the constructor of the contract
+    #Deploy contracts that are not already deployed
     def deploy_contract(self, abi, bin, *constructor_params):
         # Define the contract with bytecode and abi, create deployment transaction, sign it and run as others
         # This deploys the contract and runs the constructor
@@ -84,14 +92,24 @@ class Hashpayment:
     def deploy_contracts(self):
         # Deploy all contracts in our program. In this case it is just OutContract in HashPaymentSystem.sol
         # First extract abi and bytecode from our compiled contract
+        # Deploy only those which are not already deployed
         def get_abi_and_binary(path, name):
             abi = self.raw_contract['contracts'][path][name]['abi']
             bin = self.raw_contract['contracts'][path][name]['evm']['bytecode']['object']
             return abi, bin
-        (mainabi, mainbin) = get_abi_and_binary("HashPaymentSystem.sol", "OutContract")
-        # Deploy it and set address of our contract to new deployed address
-        contract_addr = self.deploy_contract(mainabi,mainbin)
-        self.deployed_contract = self.chain.eth.contract(address=contract_addr, abi=mainabi)
+        if self.deployed_contract is None:
+            (mainabi, mainbin) = get_abi_and_binary("HashPaymentSystem.sol", "OutContract")
+            # Deploy it and set address of our contract to new deployed address
+            contract_addr = self.deploy_contract(mainabi,mainbin)
+            self.deployed_contract = self.chain.eth.contract(address=contract_addr, abi=mainabi)
+        #Deploy the library and contract for BN254
+        if self.bn254_contract is None:
+            (utilabi, utilbin) = get_abi_and_binary("Utils.sol", "Utils")
+            util_addr = self.deploy_contract(utilabi, utilbin)
+            util_contract = self.chain.eth.contract(address=util_addr,abi=utilabi)
+            (bnabi,bnbin) = get_abi_and_binary("BN254.sol","BN254")
+            bin_addr = self.deploy_contract(bnabi,bnbin)
+            self.bn254_contract = self.chain.eth.contract(address=bin_addr,abi=bnabi)
 
     @staticmethod
     def new_deployment(url, chainid, address, privatekey):
