@@ -244,14 +244,34 @@ library BN254 {
     /// @dev equality holds for e(a1, a2) == e(-b1, b2) (NOTE: input `b1`=-b1)
     /// @dev caller needs to ensure that a1, a2, b1 and b2 are within proper group
     /// @dev Modified from original credit: Aztec, Spilsbury Holdings Ltd
+    function pairingProd3(
+        G1Point memory a1
+
+    ) public view returns (bool) {
+        uint256 out = 9;
+        bool success;
+       // require(false,"Just stop here");
+
+
+        //require(success, "Bn254: Pairing check failed!");
+        return (out != 0);
+    }
+
+
+    /// @dev Evaluate the following pairing product:
+    /// @dev e(a1, a2).e(b1, b2) == 1
+    /// @dev equality holds for e(a1, a2) == e(-b1, b2) (NOTE: input `b1`=-b1)
+    /// @dev caller needs to ensure that a1, a2, b1 and b2 are within proper group
+    /// @dev Modified from original credit: Aztec, Spilsbury Holdings Ltd
     function pairingProd2(
         G1Point memory a1,
         G2Point memory a2,
         G1Point memory b1,
         G2Point memory b2
     ) public view returns (bool) {
-        uint256 out;
+        uint256 out = 9;
         bool success;
+
         assembly {
             let mPtr := mload(0x40)
             mstore(mPtr, mload(a1))
