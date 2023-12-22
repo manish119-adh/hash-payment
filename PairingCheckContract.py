@@ -27,6 +27,11 @@ if __name__ == "__main__":
     R = scalar_multiply(g2, random.randint(0,order))
     S_p = scalar_multiply(R, x)
 
+
+
+    # Multiply check in contract
+
+
     # pair1 = pairing(S_p, g)
     # pair2 = pairing(R, X)
     # pair3 = pairing(R, g)
@@ -38,6 +43,12 @@ if __name__ == "__main__":
     # chk4 = pair3 == pair4
 
     hdkj = 90
+
+    def check_pairing_many(hp:Hashpayment, a_list, b, c_list, d):
+        list_2_g1 = lambda lst_g1 : [(f[0].n,f[1].n) for f in lst_g1]
+        _2g2 = lambda b_: (b_[0].coeffs[0].n,b_[0].coeffs[1].n,b_[1].coeffs[0].n,b_[1].coeffs[1].n)
+        return hp.bn254_contract.functions.checkMultiplePairings(list_2_g1(a_list),_2g2(b),list_2_g1(c_list),_2g2(d)).call()
+
 
 
 
@@ -62,6 +73,12 @@ if __name__ == "__main__":
 
     # Check the same on smart contract
     contract = Hashpayment.new_deployment("http://127.0.0.1:8545", 1337, "0x5CE381742dbbD66eDBBAEA729c4ca2910513E783", "0xa49ef90f49f0e9ff05eff11ac50ff924ad08397b792542806455baf68d650ab0")
+    r_list = [scalar_multiply(g, random.randint(0, order)) for _ in range(10)]
+    X = scalar_multiply(g2, x)
+    s_list = [scalar_multiply(r_, x) for r_ in r_list]
+    succ = check_pairing_many(contract, s_list, g2, r_list, X)
+    succ_ = check_pairing_many(contract, s_list[:5],g2,r_list[5:],X)
+    S_p_ = contract.bn254_contract.functions.checkMultiplication((R[0].coeffs[0].n,R[0].coeffs[1].n,R[1].coeffs[0].n,R[1].coeffs[1].n),x).call()
     result = check_pairing(contract,g,S_p,X,R)
     print("First pairing passed")
     result = check_pairing(contract,g,S_p, g, R)

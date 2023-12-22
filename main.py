@@ -56,6 +56,7 @@ class Hashpayment:
             'sources': {
                 "HashPaymentSystem.sol": {'urls': ["contract/HashPaymentSystem.sol"]}, # Source files
                 "BN254.sol":{'urls':["contract/bn254/BN254.sol"]},
+                "BN256G2.sol": {'urls': ["contract/bn254/BN256G2.sol"]},
                 "Utils.sol":{'urls':["contract/bn254/Utils.sol"]},
                 "PairingCheckContract.sol": {'urls': ["contract/bn254/PairingCheckContract.sol"]}
 
@@ -110,9 +111,11 @@ class Hashpayment:
             util_contract = self.chain.eth.contract(address=util_addr,abi=utilabi)
             (bnabi,bnbin) = get_abi_and_binary("BN254.sol","BN254")
             bn_addr = self.deploy_contract(bnabi,bnbin)
+            (bng2abi, bng2bin) = get_abi_and_binary("BN256G2.sol", "BN256G2")
+            bng2_addr = self.deploy_contract(bng2abi, bng2bin)
             (pairingabi, pairingbin) = get_abi_and_binary("PairingCheckContract.sol","PairingCheckContract")
             pairingbin = link_code(pairingbin,
-                                   {"BN254.sol:BN254": bn_addr})
+                                   {"BN254.sol:BN254": bn_addr, "BN256G2.sol:BN256G2": bng2_addr})
 
             pair_addr = self.deploy_contract(pairingabi, pairingbin)
             self.bn254_contract = self.chain.eth.contract(address=pair_addr,abi=pairingabi)

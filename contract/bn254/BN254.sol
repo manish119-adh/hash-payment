@@ -7,6 +7,9 @@
 // This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 // You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+// https://github.com/musalbas/solidity-BN256G2/blob/master/BN256G2.sol
+// Original
+//
 //
 // Based on:
 // - Christian Reitwiessner: https://gist.githubusercontent.com/chriseth/f9be9d9391efc5beb9704255a8e2989d/raw/4d0fb90847df1d4e04d507019031888df8372239/snarktest.solidity
@@ -80,7 +83,7 @@ library BN254 {
     }
 
     /// @notice the neutral/infinity point of G1
-    function infinity() internal pure returns (G1Point memory) {
+    function infinity() public pure returns (G1Point memory) {
         return G1Point(BaseField.wrap(0), BaseField.wrap(0));
     }
 
