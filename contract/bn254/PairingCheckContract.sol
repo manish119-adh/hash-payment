@@ -8,6 +8,10 @@ contract PairingCheckContract {
 
     }
 
+
+
+
+
     uint64 public countdone =0;
 
     function checkPairing(BN254.G1Point memory a1, BN254.G2Point memory a2, BN254.G1Point memory b1, BN254.G2Point memory b2) external {
@@ -47,4 +51,72 @@ contract PairingCheckContract {
        bool paired = BN254.pairingProd2(s_sum,g2,r_sum_neg,x);
         return paired;
     }
+}
+
+contract ProtectedContract {
+
+    bool internal reentrantLock = false;
+    constructor(){
+
+    }
+
+    uint256 public ncalls = 0;
+
+
+    modifier noReentrant {
+        require(!reentrantLock, "Reentrant detected");
+        reentrantLock = true;
+        _;
+        reentrantLock = false;
+
+    }
+
+    function deposit() external payable {
+
+    }
+
+    function externalContract() external {
+        ncalls += 1;
+        reEntrantPrevented();
+
+    }
+
+    function reEntrantPrevented() internal noReentrant {
+        payable(msg.sender).call{value: 1}("");
+
+    }
+
+}
+
+// Test reintrancy prevention
+contract AttackerContract {
+
+    ProtectedContract contrant;
+
+
+    constructor(){
+        contrant = new ProtectedContract();
+    }
+
+    function deposit() external payable {
+        contrant.deposit{value:msg.value}();
+    }
+
+    function attack() external {
+        contrant.externalContract();
+    }
+
+    function ncalls() public view returns (uint256){
+        return contrant.ncalls();
+    }
+
+    fallback() external payable {
+
+
+    }
+
+    function protectedAddress() external view returns (address){
+        return address(contrant);
+    }
+
 }

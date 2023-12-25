@@ -119,6 +119,10 @@ class Hashpayment:
 
             pair_addr = self.deploy_contract(pairingabi, pairingbin)
             self.bn254_contract = self.chain.eth.contract(address=pair_addr,abi=pairingabi)
+            (attackabi, attackbin) = get_abi_and_binary("PairingCheckContract.sol", "AttackerContract")
+            attack_addr = self.deploy_contract(attackabi,attackbin)
+            self.attack_contract = self.chain.eth.contract(address=attack_addr,abi=attackabi)
+
 
     @staticmethod
     def new_deployment(url, chainid, address, privatekey):
@@ -183,6 +187,17 @@ class Hashpayment:
     def check_balance(self):
         return self.chain.eth.get_balance(self.address, "latest")
 
+    def deposit_attack(self,amount):
+        fcall = self.attack_contract.functions.deposit()
+        return self.make_transaction(fcall,amount)
+
+    def try_attack(self):
+        fcall = self.attack_contract.functions.attack()
+        return self.make_transaction(fcall)
+
+    def get_ncalls(self):
+        return self.attack_contract.functions.ncalls().call()
+
 
 
     # There are two types of function call here.
@@ -209,6 +224,14 @@ if __name__ == "__main__":
     # the contract before any deposit is made
     depositor = Hashpayment.new_deployment("http://127.0.0.1:8545", 1337, "0x5CE381742dbbD66eDBBAEA729c4ca2910513E783", "0xa49ef90f49f0e9ff05eff11ac50ff924ad08397b792542806455baf68d650ab0")
     # Create a receiver after it deposits the payment
+    depositor.deposit_attack(1000)
+    depositor.try_attack()
+    ncalls = depositor.get_ncalls()
+    attacker_balance = depositor.chain.eth.get_balance(depositor.attack_contract.address, "latest")
+    victim_address = depositor.attack_contract.functions.protectedAddress().call()
+    victim_balance = depositor.chain.eth.get_balance(victim_address, "latest")
+    depositor.try_attack()
+    ncalls = depositor.get_ncalls()
     receiver = Hashpayment("http://127.0.0.1:8545",1337,"0xC2960602b1437c7B67D5B9Ebe03278a04300F59f", "0x4f2b3c09f93653c9282af0e2f01ec3c9c0c4760d7e490444eb41bd6b98efbd86",(depositor.deployed_contract.abi,depositor.deployed_contract.address))
     deposit_bytes = b'thisismytestbuyeskeywordforall'
     deposit_hash = SHA256.new(deposit_bytes).digest()
@@ -235,6 +258,10 @@ if __name__ == "__main__":
         print(f"Claim failed:: {err.message}")
     print(f"Claim 3, depositor = {depositor.check_balance()} receiver = {receiver.check_balance()}")
     jhsj = 9
+
+
+
+
 
     # The contract has depositor (who also deployed the contract and therefore is the owner)
     # depositing 20 ethers and receiver claiming it. Three claims are made
