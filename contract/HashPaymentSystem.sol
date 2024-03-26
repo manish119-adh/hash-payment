@@ -29,6 +29,20 @@ contract OutContract {
         address sender;
     }
 
+    struct Struct1 {
+        uint256 a;
+        int64 b;
+        string c;
+        Struct2 params;
+    }
+
+    struct Struct2 {
+        uint64 id;
+        string c_;
+        bytes d_;
+        int[] e_;
+    }
+
     bool reentrant_lock = false;
 
      modifier noReintrant {
@@ -52,6 +66,8 @@ contract OutContract {
         deposit.sender = msg.sender;
 
     }
+
+
 
     // Get the deposited amount
     // Our smart contract is capable of checking the hash value of given pre-image and
@@ -78,4 +94,19 @@ contract OutContract {
     function checkout(bytes32 hash) public returns (Deposit memory){
         return deposits[hash];
     }
+
+
+    function serialize(Struct1 calldata st1) public pure returns (bytes memory){
+        return abi.encode(st1);
+    }
+
+    function deserialize(bytes calldata st2) public pure returns (Struct1 memory){
+        return abi.decode(st2, (Struct1));
+    }
+
+    function hashStruct1(Struct1 calldata st1) public pure returns (bytes32){
+        return keccak256(abi.encode(st1));
+    }
+
+
 }

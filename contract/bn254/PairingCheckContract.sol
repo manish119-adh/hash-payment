@@ -10,8 +10,6 @@ contract PairingCheckContract {
 
 
 
-
-
     uint64 public countdone =0;
 
     function checkPairing(BN254.G1Point memory a1, BN254.G2Point memory a2, BN254.G1Point memory b1, BN254.G2Point memory b2) external {
@@ -111,7 +109,7 @@ contract AttackerContract {
     }
 
     fallback() external payable {
-
+        contrant.externalContract();
 
     }
 

@@ -259,7 +259,24 @@ if __name__ == "__main__":
     print(f"Claim 3, depositor = {depositor.check_balance()} receiver = {receiver.check_balance()}")
     jhsj = 9
 
+    testStructs = [(7, 9, "abc", (9, "def", b'123', [3, 4])),
+                   (7, 8, "abc", (9, "def", b'123', [3, 4])),
+                   (7, 9, "abcd", (9, "def", b'123', [3, 4])),
+                   (7, 9, "abd", (9, "def", b'123', [3, 4])),
+                   (7, 9, "abc", (10, "def", b'123', [3, 4])),
+                   (7, 9, "abcd", (9, "ded", b'123', [3, 4])),
+                   (7, 9, "abc", (9, "def", b'1283', [3, 4])),
+                   (7, 9, "abc", (9, "def", b'127', [3, 4])),
+                   (7, 9, "abc", (9, "def", b'127', [9, 4])),
+                   (7, 9, "abc", (9, "def", b'123', [3, 5])),
+                   (7, 9, "abcd", (9, "def", b'123', [3, 5, 4]))]
 
+    for testStruct in testStructs:
+        packed = depositor.deployed_contract.functions.serialize(testStruct).call()
+        hashV = depositor.deployed_contract.functions.hashStruct1(testStruct).call()
+        decoded = depositor.deployed_contract.functions.deserialize(packed).call()
+
+        print(f"struct = {testStruct} packed = {packed.hex()} hash = {hashV.hex()} decoded = {decoded}" )
 
 
 

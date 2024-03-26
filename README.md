@@ -20,3 +20,7 @@ Solidity code for pairing from
 
 https://github.com/EspressoSystems/solidity-bn254
 
+Python code for modular square root
+
+https://gist.github.com/nakov/60d62bdf4067ea72b7832ce9f71ae079
+
